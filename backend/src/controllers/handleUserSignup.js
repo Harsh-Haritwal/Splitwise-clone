@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+const jwt = require('jsonwebtoken');
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const isValidEmail = (email) => {
@@ -39,7 +40,9 @@ const handleUserSignup = async (req, res) => {
       ...(avatar ? { avatar: avatar } : {}),
     };
     const newUser = await User.insertOne(newUserDetails);
-    res.status(201).json({ msg: "Signup done!" });
+    const payload = { id: newUser._id, role: 'user' };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.status(201).json({ msg: "Signup done!", token: token });
   } catch (error) {
     console.log(error);
     

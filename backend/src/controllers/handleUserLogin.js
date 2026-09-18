@@ -1,5 +1,6 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -18,15 +19,17 @@ const handleUserLogin = async (req, res) => {
       res.status(400).json({ msg: "Enter valid details" });
       return;
     }
-
-    const user = await User.findOne({ email });
+    const verifiedEmial = email.toLowerCase()
+    const user = await User.findOne({ verifiedEmial });
     if (!user) {
       res.status(401).json({ msg: "Invalid email or password" });
       return;
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (isMatch) {
-        res.status(200).json({ msg: "Successfull login" });
+        const payload = { id: user._id, role: 'user' };
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.status(200).json({ msg: "Successful login", token: token });
         return;
     }
     res.status(401).json({ msg: "Invalid email or password" });
