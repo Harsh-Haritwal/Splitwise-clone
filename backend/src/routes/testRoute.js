@@ -5,6 +5,6 @@ const authMid = require("../middleware/authMiddleware");
 
 const testRoute = express.Router();
 
-testRoute.get("/testroute", authMid, handleTestRoute );
+testRoute.get("/testroute", handleTestRoute );
 
 module.exports = testRoute;
