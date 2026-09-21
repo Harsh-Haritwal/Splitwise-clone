@@ -6,6 +6,7 @@ const authMid = require("../middleware/authMiddleware");
 const handleUpdateProfile = require("../controllers/handleUpdateProfile");
 const handleUserDelete = require("../controllers/handleUserDelete");
 const handleUserChangePassword = require("../controllers/handleUserChangePassword");
+const handleUserLogout = require("../controllers/handleUserLogout");
 
 const userRouter = express.Router();
 
@@ -15,5 +16,6 @@ userRouter.get("/profile", authMid, handleUserProfile);
 userRouter.patch("/profile", authMid, handleUpdateProfile);
 userRouter.delete("/profile", authMid, handleUserDelete);
 userRouter.patch("/change-password", authMid, handleUserChangePassword);
+userRouter.post("/logout", authMid, handleUserLogout);
 
 module.exports = userRouter;
