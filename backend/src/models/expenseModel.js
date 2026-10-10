@@ -28,7 +28,7 @@ const expenseSchema = mongoose.Schema({
       message: `Amount must be greater than 0.`,
     },
   },
-  group: {
+  groupId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Group",
     required: true,
