@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../api";
 import ExpenseForm from "../components/ExpenseForm";
+import SettlementForm from "../components/SettlementForm";
 import { useAuth } from "../context/auth-context";
 
 const initial = (name) => {
@@ -60,6 +61,11 @@ function GroupDetail() {
   const [balancesLoading, setBalancesLoading] = useState(true);
   const [balancesError, setBalancesError] = useState("");
   const [balanceVersion, setBalanceVersion] = useState(0);
+
+  const [settlements, setSettlements] = useState([]);
+  const [settlementsLoading, setSettlementsLoading] = useState(true);
+  const [settlementsError, setSettlementsError] = useState("");
+  const [settlementDraft, setSettlementDraft] = useState(null);
 
   const [addEmail, setAddEmail] = useState("");
   const [adding, setAdding] = useState(false);
@@ -154,6 +160,31 @@ function GroupDetail() {
     };
   }, [groupId, balanceVersion]);
 
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .get(`/settlement/group/${groupId}`)
+      .then((data) => {
+        if (!cancelled) {
+          setSettlements(data.settlements);
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setSettlementsError(error.message);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setSettlementsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [groupId, balanceVersion]);
+
   const loadGroup = async () => {
     const data = await api.get(`/group/${groupId}`);
     setGroup(data.group);
@@ -168,6 +199,19 @@ function GroupDetail() {
   const handleExpenseSaved = async () => {
     await loadExpenses();
     setBalanceVersion((version) => version + 1);
+  };
+
+  const handleSettlementSaved = () => {
+    setBalanceVersion((version) => version + 1);
+  };
+
+  const handleStartSettlement = (debt) => {
+    setSettlementDraft({
+      from: debt.from._id,
+      to: debt.to._id,
+      amount: debt.amount,
+    });
+    setTab("settlements");
   };
 
   const handleAddMember = async (event) => {
@@ -371,6 +415,16 @@ function GroupDetail() {
           onClick={() => setTab("balances")}
         >
           Balances
+        </button>
+        <button
+          type="button"
+          className={tab === "settlements" ? "tab active" : "tab"}
+          onClick={() => {
+            setSettlementDraft(null);
+            setTab("settlements");
+          }}
+        >
+          Settlements
         </button>
         <button
           type="button"
@@ -625,8 +679,17 @@ function GroupDetail() {
                             </div>
                           </div>
                         </div>
-                        <div className="amount">
-                          ₹{formatAmount(debt.amount)}
+                        <div className="list-end">
+                          <div className="amount">
+                            ₹{formatAmount(debt.amount)}
+                          </div>
+                          <button
+                            type="button"
+                            className="btn btn-outline btn-sm mt-8"
+                            onClick={() => handleStartSettlement(debt)}
+                          >
+                            Record
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -635,6 +698,91 @@ function GroupDetail() {
               </div>
             </>
           )}
+        </>
+      )}
+
+      {tab === "settlements" && (
+        <>
+          <div className="card mb-16">
+            <div className="card-header">
+              <div>
+                <div className="card-title">Record a settlement</div>
+                <div className="card-subtitle">
+                  Use this when someone pays another member back.
+                </div>
+              </div>
+            </div>
+
+            <SettlementForm
+              group={group}
+              draft={settlementDraft}
+              onSaved={handleSettlementSaved}
+            />
+          </div>
+
+          <div className="card">
+            <div className="card-header">
+              <div>
+                <div className="card-title">Settlement history</div>
+                <div className="card-subtitle">
+                  {settlements.length === 0
+                    ? "No settlements recorded yet."
+                    : `${settlements.length} settlement${
+                        settlements.length === 1 ? "" : "s"
+                      } recorded.`}
+                </div>
+              </div>
+            </div>
+
+            {settlementsLoading && (
+              <div className="loading">
+                <div className="spinner"></div>
+                Loading settlements...
+              </div>
+            )}
+
+            {!settlementsLoading && settlementsError && (
+              <div className="alert alert-error">{settlementsError}</div>
+            )}
+
+            {!settlementsLoading &&
+              !settlementsError &&
+              settlements.length === 0 && (
+                <div className="empty">
+                  <div className="empty-title">Nothing settled yet</div>
+                  Record a payment above when someone pays you back.
+                </div>
+              )}
+
+            {!settlementsLoading &&
+              !settlementsError &&
+              settlements.length > 0 && (
+                <div className="list">
+                  {settlements.map((settlement) => (
+                    <div className="list-row" key={settlement._id}>
+                      <div className="list-main">
+                        <span className="avatar avatar-sm">
+                          {initial(settlement.paidBy.name)}
+                        </span>
+                        <div>
+                          <div className="list-title">
+                            {settlement.paidBy.name} paid{" "}
+                            {settlement.paidTo.name}
+                          </div>
+                          <div className="list-meta">
+                            {formatDate(settlement.createdAt)}
+                            {settlement.note ? ` · ${settlement.note}` : ""}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="amount">
+                        ₹{formatAmount(settlement.amount)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+          </div>
         </>
       )}
 
