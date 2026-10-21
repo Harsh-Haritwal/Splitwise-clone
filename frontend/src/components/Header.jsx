@@ -24,6 +24,9 @@ function Header() {
               <Link to="/" className="btn btn-ghost btn-sm">
                 Dashboard
               </Link>
+              <Link to="/profile" className="btn btn-ghost btn-sm">
+                Profile
+              </Link>
               <span className="header-user">{user.name}</span>
               <span className="avatar avatar-sm">
                 {user.name ? user.name.charAt(0).toUpperCase() : "U"}

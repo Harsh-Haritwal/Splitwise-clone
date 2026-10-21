@@ -8,7 +8,7 @@ const handleUserProfile = async(req, res) => {
 
     try{
 
-        const profile =await User.findOne({_id : id}).select("-password -avatar -_id");
+        const profile =await User.findOne({_id : id}).select("-password");
         if(!profile){
             return res.status(404).json({msg: "User not found"});
         }

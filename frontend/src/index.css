@@ -587,6 +587,29 @@ button {
   border-bottom-color: var(--brand);
 }
 
+/* Profile */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.profile-summary {
+  text-align: center;
+  padding: 28px 22px;
+}
+
+.profile-name {
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 12px;
+}
+
+.danger-zone {
+  border-color: #f3c7c7;
+}
+
 /* Utility */
 .stack {
   display: flex;
@@ -656,6 +679,10 @@ button {
 
   .auth-card {
     padding: 24px;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
   }
 
   .section-title {
