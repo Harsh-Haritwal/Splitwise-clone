@@ -520,11 +520,13 @@ function GroupDetail() {
               <div>
                 <div className="card-title">Expense history</div>
                 <div className="card-subtitle">
-                  {expenses.length === 0
-                    ? "No expenses in this group yet."
-                    : `Showing ${expenses.length} of ${expenseTotal} expense${
-                        expenseTotal === 1 ? "" : "s"
-                      }.`}
+                  {expensesLoading
+                    ? "Loading expenses..."
+                    : expenses.length === 0
+                      ? "No expenses in this group yet."
+                      : `Showing ${expenses.length} of ${expenseTotal} expense${
+                          expenseTotal === 1 ? "" : "s"
+                        }.`}
                 </div>
               </div>
             </div>

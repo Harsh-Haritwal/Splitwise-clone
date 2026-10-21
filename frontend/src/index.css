@@ -239,6 +239,7 @@ button {
   font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
 }
 
 .section-subtitle {
@@ -254,6 +255,11 @@ button {
   gap: 16px;
   margin-bottom: 24px;
   flex-wrap: wrap;
+}
+
+.page-head .row,
+.page-head .row > div {
+  min-width: 0;
 }
 
 /* Forms */
@@ -515,6 +521,10 @@ button {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+}
+
+.list-main > div {
   min-width: 0;
 }
 
@@ -850,6 +860,10 @@ button {
 }
 
 @media (max-width: 720px) {
+  .container {
+    padding: 0 16px;
+  }
+
   .page {
     padding: 22px 0 48px;
   }
@@ -862,10 +876,24 @@ button {
     height: auto;
     padding: 10px 0;
     flex-wrap: wrap;
+    gap: 10px 16px;
+  }
+
+  .header-nav {
+    gap: 4px;
+  }
+
+  .page-head {
+    gap: 12px;
+    margin-bottom: 20px;
   }
 
   .card {
     padding: 18px;
+  }
+
+  .card-header {
+    flex-wrap: wrap;
   }
 
   .auth-card {
@@ -896,7 +924,99 @@ button {
     grid-template-columns: 1fr;
   }
 
+  .list-row,
+  .expense-row {
+    flex-wrap: wrap;
+  }
+
+  .list-end {
+    text-align: left;
+  }
+
+  .list-title {
+    overflow: visible;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .tabs {
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .form-actions .btn {
+    flex: 1 1 auto;
+  }
+
   .section-title {
     font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 20px 0 40px;
+  }
+
+  .header-user {
+    display: none;
+  }
+
+  .header-nav {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .page-head > .btn {
+    width: 100%;
+  }
+
+  .groups-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .group-card {
+    padding: 16px;
+  }
+
+  .group-avatar-lg {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  .tab {
+    padding: 10px 12px;
+  }
+
+  .summary-card {
+    padding: 16px;
+  }
+
+  .summary-value,
+  .expense-total {
+    font-size: 22px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+    min-height: 42px;
+  }
+
+  .back-link {
+    margin-bottom: 12px;
+  }
+
+  .empty {
+    padding: 28px 8px;
   }
 }
