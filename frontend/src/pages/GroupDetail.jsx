@@ -38,6 +38,8 @@ const balanceLabel = (balance) => {
   return "settled";
 };
 
+const EXPENSE_PAGE_SIZE = 20;
+
 const formatAmount = (value) => {
   return Number(value).toFixed(2);
 };
@@ -54,6 +56,10 @@ function GroupDetail() {
   const [expenses, setExpenses] = useState([]);
   const [expensesLoading, setExpensesLoading] = useState(true);
   const [expensesError, setExpensesError] = useState("");
+  const [expensePage, setExpensePage] = useState(1);
+  const [expenseTotal, setExpenseTotal] = useState(0);
+  const [expenseTotalPages, setExpenseTotalPages] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const [balances, setBalances] = useState([]);
   const [balanceSummary, setBalanceSummary] = useState(null);
@@ -108,10 +114,13 @@ function GroupDetail() {
   useEffect(() => {
     let cancelled = false;
     api
-      .get(`/expense/group/${groupId}`)
+      .get(`/expense/group/${groupId}?page=1&limit=${EXPENSE_PAGE_SIZE}`)
       .then((data) => {
         if (!cancelled) {
           setExpenses(data.expenses);
+          setExpensePage(data.page);
+          setExpenseTotal(data.total);
+          setExpenseTotalPages(data.totalPages);
         }
       })
       .catch((error) => {
@@ -192,8 +201,32 @@ function GroupDetail() {
   };
 
   const loadExpenses = async () => {
-    const data = await api.get(`/expense/group/${groupId}`);
+    const data = await api.get(
+      `/expense/group/${groupId}?page=1&limit=${EXPENSE_PAGE_SIZE}`,
+    );
     setExpenses(data.expenses);
+    setExpensePage(data.page);
+    setExpenseTotal(data.total);
+    setExpenseTotalPages(data.totalPages);
+  };
+
+  const handleLoadMore = async () => {
+    setLoadingMore(true);
+    setExpensesError("");
+    try {
+      const nextPage = expensePage + 1;
+      const data = await api.get(
+        `/expense/group/${groupId}?page=${nextPage}&limit=${EXPENSE_PAGE_SIZE}`,
+      );
+      setExpenses([...expenses, ...data.expenses]);
+      setExpensePage(data.page);
+      setExpenseTotal(data.total);
+      setExpenseTotalPages(data.totalPages);
+    } catch (error) {
+      setExpensesError(error.message);
+    } finally {
+      setLoadingMore(false);
+    }
   };
 
   const handleExpenseSaved = async () => {
@@ -319,9 +352,6 @@ function GroupDetail() {
   }
 
   const isOwner = group.createdBy._id === user.id;
-  const totalExpenses = expenses.reduce((sum, expense) => {
-    return sum + expense.amount;
-  }, 0);
 
   return (
     <div className="container page">
@@ -458,9 +488,9 @@ function GroupDetail() {
                 <div className="card-subtitle">
                   {expenses.length === 0
                     ? "No expenses in this group yet."
-                    : `₹${formatAmount(totalExpenses)} spent across ${
-                        expenses.length
-                      } expense${expenses.length === 1 ? "" : "s"}.`}
+                    : `Showing ${expenses.length} of ${expenseTotal} expense${
+                        expenseTotal === 1 ? "" : "s"
+                      }.`}
                 </div>
               </div>
             </div>
@@ -484,37 +514,54 @@ function GroupDetail() {
             )}
 
             {!expensesLoading && !expensesError && expenses.length > 0 && (
-              <div>
-                {expenses.map((expense) => (
-                  <Link
-                    className="expense-row"
-                    key={expense._id}
-                    to={`/groups/${groupId}/expenses/${expense._id}`}
-                  >
-                    <div className="list-main">
-                      <span className="avatar">
-                        {initial(expense.description)}
-                      </span>
-                      <div>
-                        <div className="list-title">{expense.description}</div>
-                        <div className="list-meta">
-                          Paid by {expense.paidBy.name} ·{" "}
-                          {formatDate(getCreatedDate(expense))}
+              <>
+                <div>
+                  {expenses.map((expense) => (
+                    <Link
+                      className="expense-row"
+                      key={expense._id}
+                      to={`/groups/${groupId}/expenses/${expense._id}`}
+                    >
+                      <div className="list-main">
+                        <span className="avatar">
+                          {initial(expense.description)}
+                        </span>
+                        <div>
+                          <div className="list-title">
+                            {expense.description}
+                          </div>
+                          <div className="list-meta">
+                            Paid by {expense.paidBy.name} ·{" "}
+                            {formatDate(getCreatedDate(expense))}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="list-end">
-                      <div className="amount">
-                        ₹{formatAmount(expense.amount)}
+                      <div className="list-end">
+                        <div className="amount">
+                          ₹{formatAmount(expense.amount)}
+                        </div>
+                        <div className="list-meta">
+                          {expense.splits.length} participant
+                          {expense.splits.length === 1 ? "" : "s"}
+                        </div>
                       </div>
-                      <div className="list-meta">
-                        {expense.splits.length} participant
-                        {expense.splits.length === 1 ? "" : "s"}
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+                    </Link>
+                  ))}
+                </div>
+
+                {expensePage < expenseTotalPages && (
+                  <div className="form-actions mt-16">
+                    <button
+                      type="button"
+                      className="btn btn-outline"
+                      onClick={handleLoadMore}
+                      disabled={loadingMore}
+                    >
+                      {loadingMore ? "Loading..." : "Load more expenses"}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </>

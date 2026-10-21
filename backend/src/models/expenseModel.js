@@ -58,6 +58,8 @@ const expenseSchema = mongoose.Schema({
 }, { timestamps: true });
 
 
+expenseSchema.index({ groupId: 1, createdAt: -1 });
+
 const Expense = mongoose.model("Expense", expenseSchema)
 
 module.exports = Expense
