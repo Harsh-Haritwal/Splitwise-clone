@@ -52,6 +52,7 @@ function GroupDetail() {
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [groupVersion, setGroupVersion] = useState(0);
 
   const [expenses, setExpenses] = useState([]);
   const [expensesLoading, setExpensesLoading] = useState(true);
@@ -109,7 +110,7 @@ function GroupDetail() {
     return () => {
       cancelled = true;
     };
-  }, [groupId]);
+  }, [groupId, groupVersion]);
 
   useEffect(() => {
     let cancelled = false;
@@ -234,6 +235,26 @@ function GroupDetail() {
     setBalanceVersion((version) => version + 1);
   };
 
+  const handleRetryExpenses = () => {
+    setExpensesLoading(true);
+    setExpensesError("");
+    loadExpenses()
+      .catch((error) => setExpensesError(error.message))
+      .finally(() => setExpensesLoading(false));
+  };
+
+  const handleRetryBalances = () => {
+    setBalancesLoading(true);
+    setBalancesError("");
+    setBalanceVersion((version) => version + 1);
+  };
+
+  const handleRetrySettlements = () => {
+    setSettlementsLoading(true);
+    setSettlementsError("");
+    setBalanceVersion((version) => version + 1);
+  };
+
   const handleSettlementSaved = () => {
     setBalanceVersion((version) => version + 1);
   };
@@ -346,7 +367,20 @@ function GroupDetail() {
         <Link to="/" className="back-link">
           ← All groups
         </Link>
-        <div className="alert alert-error mt-16">{error}</div>
+        <div className="card">
+          <div className="alert alert-error mb-16">{error}</div>
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={() => {
+              setError("");
+              setLoading(true);
+              setGroupVersion((version) => version + 1);
+            }}
+          >
+            Try again
+          </button>
+        </div>
       </div>
     );
   }
@@ -503,7 +537,16 @@ function GroupDetail() {
             )}
 
             {!expensesLoading && expensesError && (
-              <div className="alert alert-error">{expensesError}</div>
+              <div className="mb-16">
+                <div className="alert alert-error mb-16">{expensesError}</div>
+                <button
+                  type="button"
+                  className="btn btn-outline btn-sm"
+                  onClick={handleRetryExpenses}
+                >
+                  Try again
+                </button>
+              </div>
             )}
 
             {!expensesLoading && !expensesError && expenses.length === 0 && (
@@ -513,7 +556,7 @@ function GroupDetail() {
               </div>
             )}
 
-            {!expensesLoading && !expensesError && expenses.length > 0 && (
+            {!expensesLoading && expenses.length > 0 && (
               <>
                 <div>
                   {expenses.map((expense) => (
@@ -579,7 +622,16 @@ function GroupDetail() {
           )}
 
           {!balancesLoading && balancesError && (
-            <div className="alert alert-error">{balancesError}</div>
+            <div className="card">
+              <div className="alert alert-error mb-16">{balancesError}</div>
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={handleRetryBalances}
+              >
+                Try again
+              </button>
+            </div>
           )}
 
           {!balancesLoading && !balancesError && balanceSummary && (
@@ -790,7 +842,16 @@ function GroupDetail() {
             )}
 
             {!settlementsLoading && settlementsError && (
-              <div className="alert alert-error">{settlementsError}</div>
+              <div className="mb-16">
+                <div className="alert alert-error mb-16">{settlementsError}</div>
+                <button
+                  type="button"
+                  className="btn btn-outline btn-sm"
+                  onClick={handleRetrySettlements}
+                >
+                  Try again
+                </button>
+              </div>
             )}
 
             {!settlementsLoading &&

@@ -29,6 +29,8 @@ function Dashboard() {
   const [formError, setFormError] = useState("");
 
   const loadGroups = async () => {
+    setError("");
+    setLoading(true);
     try {
       const data = await api.get("/group/my-groups");
       setGroups(data.groups || []);
@@ -212,7 +214,14 @@ function Dashboard() {
         </div>
       )}
 
-      {!loading && error && <div className="alert alert-error">{error}</div>}
+      {!loading && error && (
+        <div className="card">
+          <div className="alert alert-error mb-16">{error}</div>
+          <button type="button" className="btn btn-outline" onClick={loadGroups}>
+            Try again
+          </button>
+        </div>
+      )}
 
       {!loading && !error && groups.length === 0 && (
         <div className="card">

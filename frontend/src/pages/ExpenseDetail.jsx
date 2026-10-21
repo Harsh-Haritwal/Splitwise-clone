@@ -40,6 +40,7 @@ function ExpenseDetail() {
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [version, setVersion] = useState(0);
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
@@ -71,7 +72,7 @@ function ExpenseDetail() {
     return () => {
       cancelled = true;
     };
-  }, [expenseId, groupId]);
+  }, [expenseId, groupId, version]);
 
   const handleSaved = async () => {
     const data = await api.get(`/expense/${expenseId}`);
@@ -116,7 +117,20 @@ function ExpenseDetail() {
         <Link to={`/groups/${groupId}`} className="back-link">
           ← Back to group
         </Link>
-        <div className="alert alert-error mt-16">{error}</div>
+        <div className="card">
+          <div className="alert alert-error mb-16">{error}</div>
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={() => {
+              setError("");
+              setLoading(true);
+              setVersion((value) => value + 1);
+            }}
+          >
+            Try again
+          </button>
+        </div>
       </div>
     );
   }
