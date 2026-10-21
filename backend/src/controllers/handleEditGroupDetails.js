@@ -28,22 +28,28 @@ const handleEditGroupDetails = async(req, res) => {
         return res.status(400).json({msg: "Group name can be at most 60 characters"});
     }
     try {
-        const updatedGroup = await Group.findOneAndUpdate(
-            {_id: groupId, members: id},
-            {$set : {name: newName}},
-            {new : true}
-        )
-        if(!updatedGroup){
-            return res.status(404).json({msg: "Group not found"});
-
+        const group = await Group.findOne({ _id: groupId });
+        if (!group) {
+            return res.status(404).json({ msg: "Group not found" });
         }
-        return res.status(200).json({msg: "Group details updated", updatedGroup})
+        if (group.createdBy.toString() !== id.toString()) {
+            return res.status(403).json({
+                msg: "Only the group creator can rename this group",
+            });
+        }
+        const updatedGroup = await Group.findByIdAndUpdate(
+            groupId,
+            { $set: { name: newName } },
+            { new: true, runValidators: true },
+        );
+        return res.status(200).json({
+            msg: "Group details updated",
+            group: updatedGroup,
+        });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({msg: "Internal server error"})
-        
+        return res.status(500).json({ msg: "Internal server error" });
     }
-
-}
+};
 
 module.exports = handleEditGroupDetails;

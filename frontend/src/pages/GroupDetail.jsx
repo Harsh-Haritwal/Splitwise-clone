@@ -83,6 +83,7 @@ function GroupDetail() {
   const [groupName, setGroupName] = useState("");
   const [savingName, setSavingName] = useState(false);
   const [settingsError, setSettingsError] = useState("");
+  const [settingsMessage, setSettingsMessage] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [tab, setTab] = useState("expenses");
 
@@ -313,6 +314,7 @@ function GroupDetail() {
   const handleRename = async (event) => {
     event.preventDefault();
     setSettingsError("");
+    setSettingsMessage("");
 
     if (!groupName.trim()) {
       setSettingsError("Group name cannot be empty");
@@ -323,7 +325,7 @@ function GroupDetail() {
     try {
       await api.patch(`/group/${groupId}`, { name: groupName.trim() });
       await loadGroup();
-      setMemberMessage("Group name updated");
+      setSettingsMessage("Group name updated");
     } catch (error) {
       setSettingsError(error.message);
     } finally {
@@ -333,7 +335,7 @@ function GroupDetail() {
 
   const handleDeleteGroup = async () => {
     const confirmed = window.confirm(
-      "Delete this group and all its expenses? This cannot be undone.",
+      "Delete this group and all its expenses and settlements? This cannot be undone.",
     );
     if (!confirmed) {
       return;
@@ -431,6 +433,9 @@ function GroupDetail() {
 
           {settingsError && (
             <div className="alert alert-error mb-16">{settingsError}</div>
+          )}
+          {settingsMessage && (
+            <div className="alert alert-info mb-16">{settingsMessage}</div>
           )}
 
           <form className="form" onSubmit={handleRename}>

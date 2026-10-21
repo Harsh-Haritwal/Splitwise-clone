@@ -3,4 +3,8 @@ node_modules/
 .env.*
 !.env.example
 dist/
+coverage/
+.vscode/
+.idea/
+*.log
 .DS_Store

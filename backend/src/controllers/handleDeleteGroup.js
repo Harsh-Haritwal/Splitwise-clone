@@ -16,10 +16,14 @@ const handleDeleteGroup = async(req, res) => {
         return res.status(400).json({msg: "Invalid group id"})
     }
     try{
-        const deletedGroup = await Group.findOneAndDelete({_id: groupId, members: id})
-        if(!deletedGroup){
+        const group = await Group.findOne({_id: groupId})
+        if(!group){
             return res.status(404).json({msg: "Group not found"})
         }
+        if(group.createdBy.toString() !== id.toString()){
+            return res.status(403).json({msg: "Only the group creator can delete this group"})
+        }
+        await Group.findByIdAndDelete(groupId)
         await Expense.deleteMany({groupId: groupId})
         await Settlement.deleteMany({groupId: groupId})
         return res.status(200).json({msg: "Group deleted Successfully"})

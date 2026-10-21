@@ -60,6 +60,9 @@ const handleAddNewMembers = async (req, res) => {
     if (newMemberAlreadyAdded) {
       return res.status(409).json({ msg: "User already added" });
     }
+    if (isValidGroup.members.length >= 100) {
+      return res.status(400).json({ msg: "A group can have at most 100 members" });
+    }
 
     isValidGroup.members.push(newMember._id);
     await isValidGroup.save();

@@ -26,6 +26,11 @@ const handleDeleteGroupMember = async (req, res) => {
     if (!group) {
       return res.status(404).json({ msg: "Group not found" });
     }
+    if (group.createdBy.toString() !== id.toString()) {
+      return res.status(403).json({
+        msg: "Only the group creator can remove members",
+      });
+    }
     const isMemberAdded = group.members.some((member) => {
       return member.toString() === memberId.toString();
     });
@@ -44,7 +49,7 @@ const handleDeleteGroupMember = async (req, res) => {
       { $set: { members: newMembersArray } },
       {new: true}
     );
-    return res.status(200).json({ msg: "Member removed successfully" ,updatedGroup});
+    return res.status(200).json({ msg: "Member removed successfully", group: updatedGroup });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ msg: "Internal server error" });

@@ -15,7 +15,7 @@ const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 const app = express();
 
 const allowedOrigins = process.env.CLIENT_URL
-  ? process.env.CLIENT_URL.split(",").map((origin) => origin.trim())
+  ? process.env.CLIENT_URL.split(",").map((origin) => origin.trim().replace(/\/$/, ""))
   : ["http://localhost:5173", "http://127.0.0.1:5173"];
 
 if (process.env.NODE_ENV === "production") {

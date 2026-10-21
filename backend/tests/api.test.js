@@ -187,6 +187,54 @@ test("a settlement can be recorded and listed", async () => {
   assert.equal(list.body.settlements[0].note, "Paid by bank transfer");
 });
 
+test("only the group creator can rename or delete a group", async () => {
+  const owner = await signup("Group Owner", "owner3@example.com");
+  const friend = await signup("Group Friend", "friend3@example.com");
+  const group = await createGroup(owner.token, [
+    owner.userId,
+    friend.userId,
+  ]);
+
+  const renameByFriend = await request(app)
+    .patch(`/group/${group._id}`)
+    .set("Authorization", `Bearer ${friend.token}`)
+    .send({ name: "Friend rename" });
+  assert.equal(renameByFriend.status, 403);
+
+  const deleteByFriend = await request(app)
+    .delete(`/group/${group._id}`)
+    .set("Authorization", `Bearer ${friend.token}`);
+  assert.equal(deleteByFriend.status, 403);
+
+  const renameByOwner = await request(app)
+    .patch(`/group/${group._id}`)
+    .set("Authorization", `Bearer ${owner.token}`)
+    .send({ name: "Owner rename" });
+  assert.equal(renameByOwner.status, 200);
+  assert.equal(renameByOwner.body.group.name, "Owner rename");
+
+  const removeByFriend = await request(app)
+    .delete(`/group/${group._id}/members/${owner.userId}`)
+    .set("Authorization", `Bearer ${friend.token}`);
+  assert.equal(removeByFriend.status, 403);
+
+  const removeByOwner = await request(app)
+    .delete(`/group/${group._id}/members/${friend.userId}`)
+    .set("Authorization", `Bearer ${owner.token}`);
+  assert.equal(removeByOwner.status, 200);
+  assert.equal(removeByOwner.body.group.members.length, 1);
+
+  const deleteByOwner = await request(app)
+    .delete(`/group/${group._id}`)
+    .set("Authorization", `Bearer ${owner.token}`);
+  assert.equal(deleteByOwner.status, 200);
+
+  const getDeletedGroup = await request(app)
+    .get(`/group/${group._id}`)
+    .set("Authorization", `Bearer ${owner.token}`);
+  assert.equal(getDeletedGroup.status, 404);
+});
+
 test("unknown routes return a JSON 404 response", async () => {
   const response = await request(app).get("/api/does-not-exist");
 
