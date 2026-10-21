@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Group = require("../models/groupModel");
+const { calculateGroupBalances } = require("../utils/balanceCalculator");
 
 const handleDeleteGroupMember = async (req, res) => {
   const { id } = req.user;
@@ -37,6 +38,18 @@ const handleDeleteGroupMember = async (req, res) => {
     if (!isMemberAdded) {
       return res.status(404).json({ msg: "Member not found" });
     }
+
+    const balanceResult = await calculateGroupBalances(groupId);
+    const memberBalance = balanceResult.balances.find((balance) => {
+      return balance.user === memberId;
+    });
+
+    if (memberBalance && Math.abs(memberBalance.balance) > 0.009) {
+      return res.status(400).json({
+        msg: "Settle up with this member before removing them from the group.",
+      });
+    }
+
     if (group.members.length == 1) {
       return res.status(403).json({ msg: "Last member can't remove" });
     }

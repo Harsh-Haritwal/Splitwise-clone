@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const request = require("supertest");
 const { MongoMemoryServer } = require("mongodb-memory-server");
 const app = require("../src/app");
+const Group = require("../src/models/groupModel");
 
 let mongoServer;
 
@@ -233,6 +234,67 @@ test("only the group creator can rename or delete a group", async () => {
     .get(`/group/${group._id}`)
     .set("Authorization", `Bearer ${owner.token}`);
   assert.equal(getDeletedGroup.status, 404);
+});
+
+test("a member with an open balance cannot be removed", async () => {
+  const owner = await signup("Balance Owner", "balance-owner@example.com");
+  const friend = await signup("Balance Friend", "balance-friend@example.com");
+  const group = await createGroup(owner.token, [
+    owner.userId,
+    friend.userId,
+  ]);
+
+  const expense = await request(app)
+    .post("/expense/add")
+    .set("Authorization", `Bearer ${owner.token}`)
+    .send({
+      description: "Dinner",
+      amount: 100,
+      groupId: group._id,
+      paidBy: owner.userId,
+      participants: [owner.userId, friend.userId],
+      splitType: "equal",
+    });
+
+  assert.equal(expense.status, 201);
+
+  const blockedRemoval = await request(app)
+    .delete(`/group/${group._id}/members/${friend.userId}`)
+    .set("Authorization", `Bearer ${owner.token}`);
+
+  assert.equal(blockedRemoval.status, 400);
+  assert.match(blockedRemoval.body.msg, /Settle up with this member/);
+
+  const groupAfterBlockedRemoval = await request(app)
+    .get(`/group/${group._id}`)
+    .set("Authorization", `Bearer ${owner.token}`);
+
+  assert.equal(groupAfterBlockedRemoval.body.group.members.length, 2);
+
+  // Simulate an older group where a member was removed before this guard existed.
+  await Group.findByIdAndUpdate(group._id, {
+    $pull: { members: friend.userId },
+  });
+
+  const balances = await request(app)
+    .get(`/balance/group/${group._id}`)
+    .set("Authorization", `Bearer ${owner.token}`);
+  assert.equal(balances.status, 200);
+
+  const summary = await request(app)
+    .get(`/balance/group/${group._id}/summary`)
+    .set("Authorization", `Bearer ${owner.token}`);
+  assert.equal(summary.status, 200);
+
+  const simplified = await request(app)
+    .get(`/balance/group/${group._id}/settle`)
+    .set("Authorization", `Bearer ${owner.token}`);
+  assert.equal(simplified.status, 200);
+
+  for (const settlement of simplified.body.settlements) {
+    assert.ok(settlement.from);
+    assert.ok(settlement.to);
+  }
 });
 
 test("unknown routes return a JSON 404 response", async () => {

@@ -150,9 +150,15 @@ function GroupDetail() {
     ])
       .then(([balanceData, summaryData, settleData]) => {
         if (!cancelled) {
-          setBalances(balanceData.balances);
+          setBalances(
+            (balanceData.balances || []).filter((item) => item.user),
+          );
           setBalanceSummary(summaryData.summary);
-          setDebts(settleData.settlements);
+          setDebts(
+            (settleData.settlements || []).filter((debt) => {
+              return debt.from && debt.to;
+            }),
+          );
         }
       })
       .catch((error) => {
@@ -261,6 +267,10 @@ function GroupDetail() {
   };
 
   const handleStartSettlement = (debt) => {
+    if (!debt.from || !debt.to) {
+      return;
+    }
+
     setSettlementDraft({
       from: debt.from._id,
       to: debt.to._id,

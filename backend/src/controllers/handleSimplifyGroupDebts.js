@@ -35,13 +35,16 @@ const handleSimplifyGroupDebts = async (req, res) => {
       memberMap[member._id.toString()] = member;
     }
 
-    const settlements = transactions.map((transaction) => {
-      return {
-        from: memberMap[transaction.from],
-        to: memberMap[transaction.to],
-        amount: transaction.amount,
-      };
-    });
+    const settlements = transactions
+      .map((transaction) => {
+        return {
+          from: memberMap[transaction.from],
+          to: memberMap[transaction.to],
+          amount: transaction.amount,
+        };
+      })
+      // Older groups may still contain balances for former members.
+      .filter((settlement) => settlement.from && settlement.to);
 
     return res.status(200).json({
       msg: "Debts simplified successfully",
