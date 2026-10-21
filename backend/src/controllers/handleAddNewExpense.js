@@ -4,6 +4,7 @@ const Group = require("../models/groupModel");
 const {
   buildEqualSplits,
   buildCustomSplits,
+  buildPercentageSplits,
 } = require("../utils/expenseSplits");
 
 const handleAddNewExpense = async (req, res) => {
@@ -19,6 +20,7 @@ const handleAddNewExpense = async (req, res) => {
     participants,
     splitType,
     splits: customSplits,
+    percentages,
   } = req.body;
   if (!description || !amount || !groupId || !paidBy || !participants) {
     return res.status(400).json({ msg: "Incomplete info or invalid amount" });
@@ -87,6 +89,12 @@ const handleAddNewExpense = async (req, res) => {
       splits = buildEqualSplits(amount, participants).splits;
     } else if (selectedSplitType === "custom") {
       const result = buildCustomSplits(amount, participants, customSplits);
+      if (result.error) {
+        return res.status(400).json({ msg: result.error });
+      }
+      splits = result.splits;
+    } else if (selectedSplitType === "percentage") {
+      const result = buildPercentageSplits(amount, participants, percentages);
       if (result.error) {
         return res.status(400).json({ msg: result.error });
       }
