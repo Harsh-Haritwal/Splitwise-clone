@@ -1,13 +1,25 @@
 const mongoose = require("mongoose");
 const Expense = require("../models/expenseModel");
 const Group = require("../models/groupModel");
+const {
+  buildEqualSplits,
+  buildCustomSplits,
+} = require("../utils/expenseSplits");
 
 const handleAddNewExpense = async (req, res) => {
   const { id } = req.user;
   if (!id) {
     return res.status(401).json({ msg: "Unauthorized access" });
   }
-  const { description, amount, groupId, paidBy, participants } = req.body;
+  const {
+    description,
+    amount,
+    groupId,
+    paidBy,
+    participants,
+    splitType,
+    splits: customSplits,
+  } = req.body;
   if (!description || !amount || !groupId || !paidBy || !participants) {
     return res.status(400).json({ msg: "Incomplete info or invalid amount" });
   }
@@ -68,16 +80,20 @@ const handleAddNewExpense = async (req, res) => {
       return res.status(400).json({ msg: "Invalid amount" });
     }
 
-    const shareEach = Math.round((amount / participants.length) * 100) / 100;
+    const selectedSplitType = splitType ? splitType : "equal";
+    let splits;
 
-    const splits = participants.map((participant) => {
-      return { user: participant, amount: shareEach };
-    });
-    const totalSplit = splits.reduce((sum, split) => (sum += split.amount), 0);
-    const difference = Math.round((amount - totalSplit) * 100) / 100;
-
-    splits[splits.length - 1].amount =
-      Math.round((splits[splits.length - 1].amount + difference) * 100) / 100;
+    if (selectedSplitType === "equal") {
+      splits = buildEqualSplits(amount, participants).splits;
+    } else if (selectedSplitType === "custom") {
+      const result = buildCustomSplits(amount, participants, customSplits);
+      if (result.error) {
+        return res.status(400).json({ msg: result.error });
+      }
+      splits = result.splits;
+    } else {
+      return res.status(400).json({ msg: "Invalid split type" });
+    }
 
     const newExpense = await Expense.create({
       description: newDesc,
