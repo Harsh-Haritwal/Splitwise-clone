@@ -1,9 +1,15 @@
 const express = require("express");
 const handleFetchGroupBalances = require("../controllers/handleFetchGroupBalances");
+const handleFetchGroupBalanceSummary = require("../controllers/handleFetchGroupBalanceSummary");
 const authMid = require("../middleware/authMiddleware");
 
 const balanceRouter = express.Router();
 
 balanceRouter.get("/group/:groupId", authMid, handleFetchGroupBalances);
+balanceRouter.get(
+  "/group/:groupId/summary",
+  authMid,
+  handleFetchGroupBalanceSummary,
+);
 
 module.exports = balanceRouter;
