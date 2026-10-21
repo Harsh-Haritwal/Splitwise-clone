@@ -387,7 +387,8 @@ function GroupDetail() {
     );
   }
 
-  const isOwner = group.createdBy._id === user.id;
+  const ownerId = group.createdBy ? group.createdBy._id : "";
+  const isOwner = ownerId === user.id;
 
   return (
     <div className="container page">
@@ -943,10 +944,10 @@ function GroupDetail() {
                 </div>
               </div>
               <div className="row">
-                {member._id === group.createdBy._id && (
+                {member._id === ownerId && (
                   <span className="badge">Owner</span>
                 )}
-                {member._id !== group.createdBy._id &&
+                {member._id !== ownerId &&
                   member._id !== user.id && (
                     <button
                       type="button"

@@ -135,8 +135,8 @@ function ExpenseDetail() {
     );
   }
 
-  const canModify =
-    expense.paidBy._id === user.id || group.createdBy._id === user.id;
+  const ownerId = group.createdBy ? group.createdBy._id : "";
+  const canModify = expense.paidBy._id === user.id || ownerId === user.id;
 
   return (
     <div className="container page">
