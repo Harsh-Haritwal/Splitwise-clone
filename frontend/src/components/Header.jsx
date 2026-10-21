@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/auth-context";
 
 function Header() {
@@ -13,22 +13,32 @@ function Header() {
   return (
     <header className="site-header">
       <div className="container header-inner">
-        <Link to="/" className="logo">
-          <span className="logo-mark">S</span>
-          Splitwise
+        <Link to="/" className="logo" aria-label="Khata home">
+          khata<span className="logo-dot">.</span>
         </Link>
 
-        <nav className="header-nav">
+        <nav className="header-nav" aria-label="Main navigation">
           {user ? (
             <>
-              <Link to="/" className="btn btn-ghost btn-sm">
+              <NavLink
+                to="/"
+                end
+                className={({ isActive }) =>
+                  `btn btn-ghost btn-sm${isActive ? " is-active" : ""}`
+                }
+              >
                 Dashboard
-              </Link>
-              <Link to="/profile" className="btn btn-ghost btn-sm">
+              </NavLink>
+              <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                  `btn btn-ghost btn-sm${isActive ? " is-active" : ""}`
+                }
+              >
                 Profile
-              </Link>
+              </NavLink>
               <span className="header-user">{user.name}</span>
-              <span className="avatar avatar-sm">
+              <span className="avatar avatar-sm" aria-hidden="true">
                 {user.name ? user.name.charAt(0).toUpperCase() : "U"}
               </span>
               <button

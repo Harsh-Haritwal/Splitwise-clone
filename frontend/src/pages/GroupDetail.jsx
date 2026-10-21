@@ -395,16 +395,19 @@ function GroupDetail() {
         ← All groups
       </Link>
 
-      <div className="page-head">
+      <div className="page-head group-page-head">
         <div className="row">
           <span className="group-avatar group-avatar-lg">
             {initial(group.name)}
           </span>
           <div>
+            <p className="eyebrow">
+              Group ledger / {group.members.length} member
+              {group.members.length === 1 ? "" : "s"}
+            </p>
             <h1 className="section-title">{group.name}</h1>
             <p className="section-subtitle">
-              {group.members.length} member
-              {group.members.length === 1 ? "" : "s"}
+              Opened {formatDate(group.createdAt)}
             </p>
           </div>
         </div>
@@ -418,6 +421,15 @@ function GroupDetail() {
             {showSettings ? "Close settings" : "Group settings"}
           </button>
         )}
+      </div>
+
+      <div className="group-strip">
+        <span>Ledger open</span>
+        <span className="dot">/</span>
+        <span>{expenseTotal} entries</span>
+        <span className="dot">/</span>
+        <span>{group.members.length} people</span>
+        <span className="push">{tab}</span>
       </div>
 
       {showSettings && isOwner && (
@@ -971,7 +983,7 @@ function GroupDetail() {
               </button>
             </div>
             <span className="field-hint">
-              The person needs a Splitwise account already.
+              The person needs a Khata account already.
             </span>
           </div>
         </form>

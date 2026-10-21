@@ -116,6 +116,7 @@ function Profile() {
     <div className="container page">
       <div className="page-head">
         <div>
+          <p className="eyebrow">Account / personal ledger</p>
           <h1 className="section-title">Your profile</h1>
           <p className="section-subtitle">
             Manage your name, photo and password.

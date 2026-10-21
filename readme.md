@@ -1,8 +1,10 @@
-# Splitwise Clone
+# Khata
 
-A full-stack MERN app for sharing expenses with friends, tracking who owes whom, and recording settlements.
+Khata is a full-stack MERN app for sharing expenses with friends, tracking who owes whom, and recording settlements. It is inspired by Splitwise but built around a warmer, more human ledger.
 
 The project is complete and includes authentication, groups, expenses, balances, settlements, pagination, responsive screens and automated tests.
+
+The interface uses a print-inspired “receipt” direction: newsprint paper, safety orange, oversized headlines, sharp rules and monospaced numbers.
 
 ## Features
 
@@ -23,7 +25,7 @@ The project is complete and includes authentication, groups, expenses, balances,
 
 ## Tech Stack
 
-**Frontend:** React 19, Vite, React Router, plain CSS  
+**Frontend:** React 19, Vite, React Router, plain CSS with Google Fonts (Anton, Archivo, Space Mono)  
 **Backend:** Node.js, Express 5, MongoDB, Mongoose, JWT, bcrypt  
 **Testing:** Node.js test runner, Supertest, MongoDB Memory Server, Vitest, React Testing Library  
 **Deployment:** MongoDB Atlas, Render (or any Node host and static host)

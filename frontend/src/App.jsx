@@ -54,6 +54,12 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
+        <footer className="site-footer">
+          <div className="container footer-inner">
+            <span>Khata / shared money, kept human.</span>
+            <span>Groups, expenses &amp; settlements</span>
+          </div>
+        </footer>
       </BrowserRouter>
     </AuthProvider>
   );

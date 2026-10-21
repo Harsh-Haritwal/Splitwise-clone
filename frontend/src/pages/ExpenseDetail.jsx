@@ -144,16 +144,18 @@ function ExpenseDetail() {
         ← Back to {group.name}
       </Link>
 
-      <div className="page-head">
+      <div className="page-head expense-page-head">
         <div className="row">
           <span className="avatar avatar-lg">
             {initial(expense.description)}
           </span>
           <div>
+            <p className="eyebrow">
+              Expense receipt / {formatDate(getCreatedDate(expense))}
+            </p>
             <h1 className="section-title">{expense.description}</h1>
             <p className="section-subtitle">
-              Added on {formatDate(getCreatedDate(expense))} by{" "}
-              {expense.paidBy.name}
+              Added by {expense.paidBy.name}
             </p>
           </div>
         </div>
