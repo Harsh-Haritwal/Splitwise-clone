@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Group = require("../models/groupModel");
-const calculateGroupBalances = require("../utils/balanceCalculator");
+const { calculateGroupBalances } = require("../utils/balanceCalculator");
 
 const handleFetchGroupBalances = async (req, res) => {
   const { id } = req.user;

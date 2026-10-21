@@ -1,6 +1,7 @@
 const express = require("express");
 const handleFetchGroupBalances = require("../controllers/handleFetchGroupBalances");
 const handleFetchGroupBalanceSummary = require("../controllers/handleFetchGroupBalanceSummary");
+const handleSimplifyGroupDebts = require("../controllers/handleSimplifyGroupDebts");
 const authMid = require("../middleware/authMiddleware");
 
 const balanceRouter = express.Router();
@@ -11,5 +12,6 @@ balanceRouter.get(
   authMid,
   handleFetchGroupBalanceSummary,
 );
+balanceRouter.get("/group/:groupId/settle", authMid, handleSimplifyGroupDebts);
 
 module.exports = balanceRouter;
