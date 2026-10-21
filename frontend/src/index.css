@@ -686,6 +686,22 @@ button {
   border-color: #f3c7c7;
 }
 
+/* Member form */
+.add-member {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.inline-form {
+  display: flex;
+  gap: 10px;
+}
+
+.inline-form .input {
+  flex: 1;
+}
+
 /* Utility */
 .stack {
   display: flex;
@@ -755,6 +771,10 @@ button {
 
   .auth-card {
     padding: 24px;
+  }
+
+  .inline-form {
+    flex-direction: column;
   }
 
   .profile-grid {

@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const Group = require("../models/groupModel");
+const Expense = require("../models/expenseModel");
+const Settlement = require("../models/settlementModel");
 
 const handleDeleteGroup = async(req, res) => {
     const {id} = req.user;
@@ -18,6 +20,8 @@ const handleDeleteGroup = async(req, res) => {
         if(!deletedGroup){
             return res.status(404).json({msg: "Group not found"})
         }
+        await Expense.deleteMany({groupId: groupId})
+        await Settlement.deleteMany({groupId: groupId})
         return res.status(200).json({msg: "Group deleted Successfully"})
     }catch(error){
         console.log(error);

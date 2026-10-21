@@ -2,52 +2,69 @@ const mongoose = require("mongoose");
 const Group = require("../models/groupModel");
 const User = require("../models/userModel");
 
-const handleAddNewMembers = async(req, res) => {
-    const {id} = req.user;
-    if(!id){
-        return res.status(401).json({msg: "User id missing"});
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+const handleAddNewMembers = async (req, res) => {
+  const { id } = req.user;
+  if (!id) {
+    return res.status(401).json({ msg: "User id missing" });
+  }
+  const { groupId } = req.params;
+  if (!groupId) {
+    return res.status(400).json({ msg: "Group id missing" });
+  }
+  if (!mongoose.Types.ObjectId.isValid(groupId)) {
+    return res.status(400).json({ msg: "Group id is not valid" });
+  }
+
+  const { newMemberId, newMemberEmail } = req.body;
+  if (!newMemberId && !newMemberEmail) {
+    return res.status(400).json({ msg: "New member's id or email is missing" });
+  }
+  if (newMemberId && !mongoose.Types.ObjectId.isValid(newMemberId)) {
+    return res.status(400).json({ msg: "New member's id is not valid" });
+  }
+  if (newMemberEmail && typeof newMemberEmail !== "string") {
+    return res.status(400).json({ msg: "New member's email is not valid" });
+  }
+
+  try {
+    const isValidGroup = await Group.findOne({ _id: groupId, members: id });
+    if (!isValidGroup) {
+      return res.status(404).json({ msg: "No group found" });
     }
-    const {groupId} = req.params;
-    if(!groupId){
-        return res.status(400).json({msg: "Group id missing"});
-    }
-    if(!mongoose.Types.ObjectId.isValid(groupId)){
-        return res.status(400).json({msg:"Group id is not valid"})
-    }
-    const {newMemberId} = req.body;
-    if(!newMemberId){
-        return res.status(400).json({msg: "New member's id missing"});
-    }
-    if(!mongoose.Types.ObjectId.isValid(newMemberId)){
-        return res.status(400).json({msg:"New member's id is not valid"});
-    }
-    try{
-        const isValidGroup =  await Group.findOne({_id:groupId, members: id})
-        if(!isValidGroup){
-           return res.status(404).json({msg: "No group found"});
-       }
-       const isNewMemberValid = await User.findOne({_id: newMemberId})
-       if(!isNewMemberValid){
-          return res.status(404).json({msg: "New member is not a valid user"});
+
+    let newMember;
+    if (newMemberId) {
+      newMember = await User.findOne({ _id: newMemberId });
+    } else {
+      const email = newMemberEmail.trim().toLowerCase();
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ msg: "Enter a valid email" });
       }
-
-       const newMemberAlreadyAdded = isValidGroup.members.some((member) => {
-            return member.toString() === newMemberId.toString()
-       })
-       if(newMemberAlreadyAdded){
-        return res.status(409).json({msg:"User already added"});
-       }
-
-       isValidGroup.members.push(newMemberId);
-       await isValidGroup.save();
-       return res.status(200).json({msg:"User added successfuly!"});
-
-    }catch(error){
-        console.log(error);
-        return res.status(500).json({msg:"Internal server error"});
+      newMember = await User.findOne({ email: email });
     }
 
+    if (!newMember) {
+      return res.status(404).json({
+        msg: "No user found with this id or email. Ask them to sign up first.",
+      });
+    }
 
-}
+    const newMemberAlreadyAdded = isValidGroup.members.some((member) => {
+      return member.toString() === newMember._id.toString();
+    });
+    if (newMemberAlreadyAdded) {
+      return res.status(409).json({ msg: "User already added" });
+    }
+
+    isValidGroup.members.push(newMember._id);
+    await isValidGroup.save();
+    return res.status(200).json({ msg: "User added successfuly!" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ msg: "Internal server error" });
+  }
+};
 
 module.exports = handleAddNewMembers;
