@@ -8,7 +8,14 @@ function Header() {
           <span className="logo-mark">S</span>
           Splitwise
         </Link>
-        <nav className="header-nav"></nav>
+        <nav className="header-nav">
+          <Link to="/login" className="btn btn-ghost btn-sm">
+            Sign in
+          </Link>
+          <Link to="/signup" className="btn btn-primary btn-sm">
+            Create account
+          </Link>
+        </nav>
       </div>
     </header>
   );
