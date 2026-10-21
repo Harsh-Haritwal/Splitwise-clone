@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AuthProvider from "./context/AuthProvider";
 import Dashboard from "./pages/Dashboard";
+import ExpenseDetail from "./pages/ExpenseDetail";
 import GroupDetail from "./pages/GroupDetail";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
@@ -29,6 +30,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <GroupDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/groups/:groupId/expenses/:expenseId"
+              element={
+                <ProtectedRoute>
+                  <ExpenseDetail />
                 </ProtectedRoute>
               }
             />

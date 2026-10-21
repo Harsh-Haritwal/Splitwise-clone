@@ -8,6 +8,29 @@ const initial = (name) => {
   return name ? name.charAt(0).toUpperCase() : "?";
 };
 
+const formatDate = (date) => {
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) {
+    return "Unknown date";
+  }
+  return parsed.toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const getCreatedDate = (expense) => {
+  if (expense.createdAt) {
+    return expense.createdAt;
+  }
+  return new Date(parseInt(expense._id.substring(0, 8), 16) * 1000);
+};
+
+const formatAmount = (value) => {
+  return Number(value).toFixed(2);
+};
+
 function GroupDetail() {
   const { groupId } = useParams();
   const { user } = useAuth();
@@ -16,6 +39,10 @@ function GroupDetail() {
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [expenses, setExpenses] = useState([]);
+  const [expensesLoading, setExpensesLoading] = useState(true);
+  const [expensesError, setExpensesError] = useState("");
 
   const [addEmail, setAddEmail] = useState("");
   const [adding, setAdding] = useState(false);
@@ -55,10 +82,40 @@ function GroupDetail() {
     };
   }, [groupId]);
 
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .get(`/expense/group/${groupId}`)
+      .then((data) => {
+        if (!cancelled) {
+          setExpenses(data.expenses);
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setExpensesError(error.message);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setExpensesLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [groupId]);
+
   const loadGroup = async () => {
     const data = await api.get(`/group/${groupId}`);
     setGroup(data.group);
     setGroupName(data.group.name);
+  };
+
+  const loadExpenses = async () => {
+    const data = await api.get(`/expense/group/${groupId}`);
+    setExpenses(data.expenses);
   };
 
   const handleAddMember = async (event) => {
@@ -166,6 +223,9 @@ function GroupDetail() {
   }
 
   const isOwner = group.createdBy._id === user.id;
+  const totalExpenses = expenses.reduce((sum, expense) => {
+    return sum + expense.amount;
+  }, 0);
 
   return (
     <div className="container page">
@@ -263,18 +323,87 @@ function GroupDetail() {
       </div>
 
       {tab === "expenses" && (
-        <div className="card">
-          <div className="card-header">
-            <div>
-              <div className="card-title">Add an expense</div>
-              <div className="card-subtitle">
-                Split it equally, by exact amounts or by percentage.
+        <>
+          <div className="card">
+            <div className="card-header">
+              <div>
+                <div className="card-title">Add an expense</div>
+                <div className="card-subtitle">
+                  Split it equally, by exact amounts or by percentage.
+                </div>
               </div>
             </div>
+
+            <ExpenseForm group={group} onSaved={loadExpenses} />
           </div>
 
-          <ExpenseForm group={group} />
-        </div>
+          <div className="card mt-16">
+            <div className="card-header">
+              <div>
+                <div className="card-title">Expense history</div>
+                <div className="card-subtitle">
+                  {expenses.length === 0
+                    ? "No expenses in this group yet."
+                    : `₹${formatAmount(totalExpenses)} spent across ${
+                        expenses.length
+                      } expense${expenses.length === 1 ? "" : "s"}.`}
+                </div>
+              </div>
+            </div>
+
+            {expensesLoading && (
+              <div className="loading">
+                <div className="spinner"></div>
+                Loading expenses...
+              </div>
+            )}
+
+            {!expensesLoading && expensesError && (
+              <div className="alert alert-error">{expensesError}</div>
+            )}
+
+            {!expensesLoading && !expensesError && expenses.length === 0 && (
+              <div className="empty">
+                <div className="empty-title">Nothing here yet</div>
+                Add your first expense above.
+              </div>
+            )}
+
+            {!expensesLoading && !expensesError && expenses.length > 0 && (
+              <div>
+                {expenses.map((expense) => (
+                  <Link
+                    className="expense-row"
+                    key={expense._id}
+                    to={`/groups/${groupId}/expenses/${expense._id}`}
+                  >
+                    <div className="list-main">
+                      <span className="avatar">
+                        {initial(expense.description)}
+                      </span>
+                      <div>
+                        <div className="list-title">{expense.description}</div>
+                        <div className="list-meta">
+                          Paid by {expense.paidBy.name} ·{" "}
+                          {formatDate(getCreatedDate(expense))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="list-end">
+                      <div className="amount">
+                        ₹{formatAmount(expense.amount)}
+                      </div>
+                      <div className="list-meta">
+                        {expense.splits.length} participant
+                        {expense.splits.length === 1 ? "" : "s"}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
       )}
 
       {tab === "members" && (

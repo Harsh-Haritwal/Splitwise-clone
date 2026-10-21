@@ -550,6 +550,48 @@ button {
   color: var(--danger);
 }
 
+.expense-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+.expense-row:hover {
+  text-decoration: none;
+  border-color: var(--brand);
+  background: #fbfefd;
+}
+
+.expense-row:last-child {
+  margin-bottom: 0;
+}
+
+.expense-total {
+  font-size: 26px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.detail-label {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
 /* Empty + loading */
 .empty {
   text-align: center;
@@ -811,6 +853,10 @@ button {
 
   .share-row {
     flex-wrap: wrap;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
   }
 
   .profile-grid {

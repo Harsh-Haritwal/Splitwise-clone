@@ -53,7 +53,7 @@ const expenseSchema = mongoose.Schema({
     type: [splitSchema],
     required: true,
   },
-});
+}, { timestamps: true });
 
 
 const Expense = mongoose.model("Expense", expenseSchema)

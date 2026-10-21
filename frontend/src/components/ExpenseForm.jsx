@@ -26,23 +26,47 @@ const buildEqualShares = (total, ids) => {
   return shares;
 };
 
-function ExpenseForm({ group, onSaved }) {
+function ExpenseForm({ group, expense, onSaved }) {
   const { user } = useAuth();
   const memberIds = group.members.map((member) => member._id);
+  const expenseMemberIds = expense
+    ? expense.participants
+        .map((participant) => participant._id)
+        .filter((id) => memberIds.includes(id))
+    : memberIds;
 
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
-  const [paidBy, setPaidBy] = useState(
-    memberIds.includes(user.id) ? user.id : memberIds[0],
+  const initialShares = {};
+  if (expense) {
+    for (const split of expense.splits) {
+      const splitUserId = split.user._id ? split.user._id : split.user;
+      if (expenseMemberIds.includes(splitUserId)) {
+        initialShares[splitUserId] = split.amount;
+      }
+    }
+  }
+
+  const [description, setDescription] = useState(
+    expense ? expense.description : "",
   );
-  const [participants, setParticipants] = useState(memberIds);
-  const [splitType, setSplitType] = useState("equal");
-  const [shares, setShares] = useState({});
+  const [amount, setAmount] = useState(
+    expense ? String(expense.amount) : "",
+  );
+  const [paidBy, setPaidBy] = useState(
+    expense
+      ? expense.paidBy._id
+      : memberIds.includes(user.id)
+        ? user.id
+        : memberIds[0],
+  );
+  const [participants, setParticipants] = useState(expenseMemberIds);
+  const [splitType, setSplitType] = useState(expense ? "custom" : "equal");
+  const [shares, setShares] = useState(initialShares);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [saving, setSaving] = useState(false);
 
   const amountNumber = Number(amount);
+  const submitLabel = expense ? "Save changes" : "Add expense";
 
   const handleSplitTypeChange = (event) => {
     const newType = event.target.value;
@@ -155,13 +179,23 @@ function ExpenseForm({ group, onSaved }) {
 
     setSaving(true);
     try {
-      const data = await api.post("/expense/add", payload);
-      setDescription("");
-      setAmount("");
-      setShares({});
-      setSuccess("Expense added successfully");
-      if (onSaved) {
-        onSaved(data.newExpense);
+      const data = expense
+        ? await api.patch(`/expense/${expense._id}`, payload)
+        : await api.post("/expense/add", payload);
+
+      if (expense) {
+        setSuccess("Expense updated successfully");
+        if (onSaved) {
+          onSaved(data.updatedExpense);
+        }
+      } else {
+        setDescription("");
+        setAmount("");
+        setShares({});
+        setSuccess("Expense added successfully");
+        if (onSaved) {
+          onSaved(data.newExpense);
+        }
       }
     } catch (error) {
       setError(error.message);
@@ -318,7 +352,7 @@ function ExpenseForm({ group, onSaved }) {
 
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? "Adding expense..." : "Add expense"}
+            {saving ? "Saving..." : submitLabel}
           </button>
         </div>
       </form>
