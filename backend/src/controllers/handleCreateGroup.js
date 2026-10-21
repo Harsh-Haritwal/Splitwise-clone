@@ -42,7 +42,7 @@ const handleCreateGroup = async (req, res) => {
   );
   if (!areValidIds) {
     return res.status(400).json({
-      message: "One or more member IDs are invalid",
+      msg: "One or more member IDs are invalid",
     });
   }
   try {
@@ -59,7 +59,7 @@ const handleCreateGroup = async (req, res) => {
     });
     return res
       .status(201)
-      .json({ msg: "Group created successfuly", Group: newGroup });
+      .json({ msg: "Group created successfully", group: newGroup });
   } catch (error) {
     console.log(error);
 

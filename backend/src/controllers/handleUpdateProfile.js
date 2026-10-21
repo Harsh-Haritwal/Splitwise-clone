@@ -41,12 +41,12 @@ const handleUpdateProfile = async (req, res) => {
       { _id: id },
       { $set: updateFields },
       { new: true, runValidators: true },
-    ).select("-password -email -_id -createdAt -updatedAt");
+    ).select("-password");
     if (!updatedUser) {
       return res.status(404).json({ msg: "user not found" });
     }
     res.status(200).json({
-      message: "Profile updated successfully",
+      msg: "Profile updated successfully",
       user: updatedUser,
     });
   } catch (error) {

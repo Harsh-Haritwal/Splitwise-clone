@@ -23,7 +23,7 @@ app.use("/user", authMid, testRoute);
 
 app.get("/api/health", (req, res) => {
     res.status(200).json({
-        succuss: true,
+        success: true,
         msg: "Splitwise clone app is running"
     })
 })

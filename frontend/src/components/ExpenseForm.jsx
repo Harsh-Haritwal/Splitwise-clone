@@ -186,7 +186,7 @@ function ExpenseForm({ group, expense, onSaved }) {
       if (expense) {
         setSuccess("Expense updated successfully");
         if (onSaved) {
-          onSaved(data.updatedExpense);
+          onSaved(data.expense);
         }
       } else {
         setDescription("");
@@ -194,7 +194,7 @@ function ExpenseForm({ group, expense, onSaved }) {
         setShares({});
         setSuccess("Expense added successfully");
         if (onSaved) {
-          onSaved(data.newExpense);
+          onSaved(data.expense);
         }
       }
     } catch (error) {

@@ -17,7 +17,7 @@ const handleAddNewExpense = async (req, res) => {
     if (!newExpense) {
       return res.status(403).json({ msg: "Unable to create new expense" });
     }
-    return res.status(201).json({ msg: "New expense created", newExpense });
+    return res.status(201).json({ msg: "New expense created", expense: newExpense });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ msg: "Internal server error" });

@@ -13,7 +13,7 @@ const handleUserProfile = async(req, res) => {
             return res.status(404).json({msg: "User not found"});
         }
         return res.status(200).json({msg: "Profile fetched successfully!",
-            userProfile: profile
+            user: profile
         })
     }catch(error){
         console.log(error);

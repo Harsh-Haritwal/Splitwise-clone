@@ -52,7 +52,7 @@ const handleEditExpense = async (req, res) => {
 
     return res.status(200).json({
       msg: "Expense updated successfully",
-      updatedExpense: updatedExpense,
+      expense: updatedExpense,
     });
   } catch (error) {
     console.log(error);

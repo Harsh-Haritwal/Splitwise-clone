@@ -15,7 +15,7 @@ function AuthProvider({ children }) {
       return null;
     }
     const data = await api.get("/user/profile");
-    return { ...data.userProfile, id: getUserIdFromToken(token) };
+    return { ...data.user, id: getUserIdFromToken(token) };
   }, []);
 
   useEffect(() => {
