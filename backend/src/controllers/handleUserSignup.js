@@ -55,7 +55,9 @@ const handleUserSignup = async (req, res) => {
     }
     const newUser = await User.create(newUserDetails);
     const payload = { id: newUser._id, role: 'user' };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+  expiresIn: process.env.JWT_EXPIRES_IN || "1h",
+});
     res.status(201).json({ msg: "Signup done!", token: token });
   } catch (error) {
     console.log(error);

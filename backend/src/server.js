@@ -3,7 +3,12 @@ const app = require("./app.js");
 const connectDB = require("./config/connectDB.js")
 const PORT = process.env.PORT || 5000;
 const dns = require("dns")
-dns.setServers(["8.8.8.8", "1.1.1.1"]);
+
+// The public DNS servers help local Atlas connections on some Windows setups.
+// Production platforms use their own DNS configuration.
+if (process.env.NODE_ENV !== "production") {
+    dns.setServers(["8.8.8.8", "1.1.1.1"]);
+}
 
 const requiredEnv = ["MONGODB_URI", "JWT_SECRET"];
 const missingEnv = requiredEnv.filter((name) => !process.env[name]);

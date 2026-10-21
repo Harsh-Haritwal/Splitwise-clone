@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
 const userRouter = require("./routes/userRoutes");
@@ -39,9 +40,13 @@ app.use("/settlement", settlementRouter);
 app.use("/user", authMid, testRoute);
 
 app.get("/api/health", (req, res) => {
-    res.status(200).json({
-        success: true,
-        msg: "Splitwise clone app is running"
+    const databaseConnected = mongoose.connection.readyState === 1;
+    res.status(databaseConnected ? 200 : 503).json({
+        success: databaseConnected,
+        msg: databaseConnected
+            ? "Splitwise clone app is running"
+            : "Database is not connected",
+        database: databaseConnected ? "connected" : "disconnected"
     })
 })
 
