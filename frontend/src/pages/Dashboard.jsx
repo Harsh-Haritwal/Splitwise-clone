@@ -186,6 +186,7 @@ function Dashboard() {
                 id="groupName"
                 type="text"
                 className="input"
+                maxLength="60"
                 placeholder="Goa trip"
                 value={name}
                 onChange={(event) => setName(event.target.value)}

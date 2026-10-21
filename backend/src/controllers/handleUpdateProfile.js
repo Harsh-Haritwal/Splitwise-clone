@@ -1,4 +1,9 @@
 const User = require("../models/userModel");
+const {
+  cleanText,
+  isValidName,
+  isValidUrl,
+} = require("../utils/validateInput");
 
 const handleUpdateProfile = async (req, res) => {
   const { id } = req.user;
@@ -7,34 +12,38 @@ const handleUpdateProfile = async (req, res) => {
   }
 
   const { name, avatar } = req.body;
-  const updateFields = {};
-  let trimmedName = "";
-  let trimmedAvatar = "";
-  if (name !== undefined && typeof name !== "string") {
-    return res.status(400).json({
-      msg: "Name must be a string",
-    });
+  if (name === undefined && avatar === undefined) {
+    return res.status(400).json({ msg: "Nothing to update" });
   }
 
-  if (avatar !== undefined && typeof avatar !== "string") {
-    return res.status(400).json({
-      msg: "Avatar must be a string",
-    });
+  const updateFields = {};
+  if (name !== undefined) {
+    if (!isValidName(name, 1, 50)) {
+      return res.status(400).json({
+        msg: "Name must be between 1 and 50 characters",
+      });
+    }
+    updateFields.name = cleanText(name);
   }
-  if (name) {
-    trimmedName = name.trim();
+
+  if (avatar !== undefined) {
+    if (typeof avatar !== "string") {
+      return res.status(400).json({
+        msg: "Avatar must be a string",
+      });
+    }
+    if (avatar.trim() !== "") {
+      if (!isValidUrl(avatar)) {
+        return res.status(400).json({
+          msg: "Avatar must be a valid URL",
+        });
+      }
+      updateFields.avatar = cleanText(avatar);
+    }
   }
-  if (avatar) {
-    trimmedAvatar = avatar.trim();
-  }
-  if (trimmedName != "") {
-    updateFields.name = trimmedName;
-  }
-  if (trimmedAvatar != "") {
-    updateFields.avatar = trimmedAvatar;
-  }
+
   if (Object.keys(updateFields).length === 0) {
-    return res.status(400).json({ msg: "Bad request" });
+    return res.status(400).json({ msg: "Nothing to update" });
   }
   try {
     const updatedUser = await User.findOneAndUpdate(

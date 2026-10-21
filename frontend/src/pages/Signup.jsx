@@ -67,6 +67,7 @@ function Signup() {
               id="name"
               type="text"
               className="input"
+              maxLength="50"
               placeholder="Harsh Haritwal"
               value={name}
               onChange={(event) => setName(event.target.value)}
@@ -80,6 +81,7 @@ function Signup() {
               id="email"
               type="email"
               className="input"
+              maxLength="254"
               placeholder="you@example.com"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -93,6 +95,7 @@ function Signup() {
               id="password"
               type="password"
               className="input"
+              maxLength="128"
               placeholder="At least 8 characters"
               value={password}
               onChange={(event) => setPassword(event.target.value)}

@@ -17,10 +17,12 @@ const expenseSchema = mongoose.Schema({
     type: String,
     required: true,
     trim: true,
+    maxlength: [200, "Description can be at most 200 characters"],
   },
   amount: {
     type: Number,
     required: true,
+    max: [10000000, "Amount cannot be more than 10000000"],
     validate: {
       validator: function (value) {
         return value > 0;

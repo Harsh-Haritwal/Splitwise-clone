@@ -18,12 +18,18 @@ const handleCreateGroup = async (req, res) => {
   if (trimmedName === "") {
     return res.status(400).json({ msg: "Enter correct data" });
   }
+  if (trimmedName.length > 60) {
+    return res.status(400).json({ msg: "Group name can be at most 60 characters" });
+  }
 
   if (!Array.isArray(members)) {
     return res.status(400).json({ msg: "Wrong data type" });
   }
   if (members.length === 0) {
     return res.status(400).json({ msg: "Members must include atleast 1" });
+  }
+  if (members.length > 100) {
+    return res.status(400).json({ msg: "A group can have at most 100 members" });
   }
     members = members.map((memberId) => memberId.toString());
 

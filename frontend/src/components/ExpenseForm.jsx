@@ -223,6 +223,7 @@ function ExpenseForm({ group, expense, onSaved }) {
               id="description"
               type="text"
               className="input"
+              maxLength="200"
               placeholder="Dinner, cab, groceries..."
               value={description}
               onChange={(event) => setDescription(event.target.value)}
@@ -235,6 +236,7 @@ function ExpenseForm({ group, expense, onSaved }) {
               id="amount"
               type="number"
               min="0"
+              max="10000000"
               step="0.01"
               className="input"
               placeholder="0.00"

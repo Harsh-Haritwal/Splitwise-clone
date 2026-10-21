@@ -163,6 +163,7 @@ function Profile() {
                 id="name"
                 type="text"
                 className="input"
+                maxLength="50"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
               />
@@ -174,6 +175,7 @@ function Profile() {
                 id="avatar"
                 type="url"
                 className="input"
+                maxLength="500"
                 placeholder="https://example.com/photo.jpg"
                 value={avatar}
                 onChange={(event) => setAvatar(event.target.value)}

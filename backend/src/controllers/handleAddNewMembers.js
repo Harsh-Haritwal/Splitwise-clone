@@ -27,6 +27,9 @@ const handleAddNewMembers = async (req, res) => {
   if (newMemberEmail && typeof newMemberEmail !== "string") {
     return res.status(400).json({ msg: "New member's email is not valid" });
   }
+  if (newMemberEmail && newMemberEmail.trim().length > 254) {
+    return res.status(400).json({ msg: "Enter a valid email" });
+  }
 
   try {
     const isValidGroup = await Group.findOne({ _id: groupId, members: id });

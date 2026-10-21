@@ -24,6 +24,9 @@ const handleEditGroupDetails = async(req, res) => {
     if(newName == ""){
         return res.status(400).json({msg: "Invalid new name"});
     }
+    if(newName.length > 60){
+        return res.status(400).json({msg: "Group name can be at most 60 characters"});
+    }
     try {
         const updatedGroup = await Group.findOneAndUpdate(
             {_id: groupId, members: id},

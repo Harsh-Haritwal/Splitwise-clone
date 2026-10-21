@@ -20,6 +20,7 @@ const settlementSchema = mongoose.Schema(
     amount: {
       type: Number,
       required: true,
+      max: [10000000, "Amount cannot be more than 10000000"],
       validate: {
         validator: function (value) {
           return value > 0;

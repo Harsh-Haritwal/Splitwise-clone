@@ -56,6 +56,7 @@ function Login() {
               id="email"
               type="email"
               className="input"
+              maxLength="254"
               placeholder="you@example.com"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -69,6 +70,7 @@ function Login() {
               id="password"
               type="password"
               className="input"
+              maxLength="128"
               placeholder="Your password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}

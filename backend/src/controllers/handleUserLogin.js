@@ -1,25 +1,24 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
-
-const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-const isValidEmail = (email) => {
-  return emailRegex.test(email);
-};
+const { cleanText, isValidEmail } = require("../utils/validateInput");
 
 const handleUserLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      res.status(400).json({ msg: "Bad request" });
+      res.status(400).json({ msg: "Email and password are required" });
       return;
     }
     if (!isValidEmail(email)) {
-      res.status(400).json({ msg: "Enter valid details" });
+      res.status(400).json({ msg: "Enter a valid email" });
       return;
     }
-    const verifiedEmail = email.toLowerCase()
+    if (typeof password !== "string" || password.length > 128) {
+      res.status(400).json({ msg: "Invalid email or password" });
+      return;
+    }
+    const verifiedEmail = cleanText(email).toLowerCase();
     const user = await User.findOne({ email: verifiedEmail });
     if (!user) {
       res.status(401).json({ msg: "Invalid email or password" });

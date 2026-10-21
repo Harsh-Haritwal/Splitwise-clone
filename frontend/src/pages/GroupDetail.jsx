@@ -376,6 +376,7 @@ function GroupDetail() {
                 id="groupName"
                 type="text"
                 className="input"
+                maxLength="60"
                 value={groupName}
                 onChange={(event) => setGroupName(event.target.value)}
               />
@@ -841,6 +842,7 @@ function GroupDetail() {
                 id="memberEmail"
                 type="email"
                 className="input"
+                maxLength="254"
                 placeholder="friend@example.com"
                 value={addEmail}
                 onChange={(event) => setAddEmail(event.target.value)}

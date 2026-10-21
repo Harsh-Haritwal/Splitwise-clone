@@ -138,6 +138,7 @@ function SettlementForm({ group, draft, onSaved }) {
               id="settlementAmount"
               type="number"
               min="0"
+              max="10000000"
               step="0.01"
               className="input"
               placeholder="0.00"

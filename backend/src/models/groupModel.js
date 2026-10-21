@@ -4,7 +4,9 @@ const groupSchema = mongoose.Schema({
     name: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        minlength: [1, "At least 1 character"],
+        maxlength: [60, "At most 60 characters"]
     },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,

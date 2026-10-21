@@ -27,6 +27,9 @@ const handleAddSettlement = async (req, res) => {
   if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {
     return res.status(400).json({ msg: "Invalid amount" });
   }
+  if (amount > 10000000) {
+    return res.status(400).json({ msg: "Amount cannot be more than 10000000" });
+  }
   if (note !== undefined && typeof note !== "string") {
     return res.status(400).json({ msg: "Note must be a string" });
   }

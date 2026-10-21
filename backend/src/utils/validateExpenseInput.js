@@ -33,6 +33,9 @@ const validateExpenseInput = async (userId, body) => {
   if (newDesc === "") {
     return error("Invalid info");
   }
+  if (newDesc.length > 200) {
+    return error("Description can be at most 200 characters");
+  }
 
   if (!mongoose.Types.ObjectId.isValid(groupId)) {
     return error("Invalid group");
@@ -54,6 +57,9 @@ const validateExpenseInput = async (userId, body) => {
   }
   if (!Array.isArray(participants) || participants.length === 0) {
     return error("Invalid participants");
+  }
+  if (participants.length > 100) {
+    return error("An expense can have at most 100 participants");
   }
   const areParticipantsIdValid = participants.every((participant) =>
     mongoose.Types.ObjectId.isValid(participant),
@@ -77,6 +83,9 @@ const validateExpenseInput = async (userId, body) => {
   }
   if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {
     return error("Invalid amount");
+  }
+  if (amount > 10000000) {
+    return error("Amount cannot be more than 10000000");
   }
 
   const selectedSplitType = splitType ? splitType : "equal";
