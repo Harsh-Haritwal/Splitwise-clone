@@ -1,41 +1,24 @@
-import { useEffect, useState } from "react";
-import api from "../api";
+import { useAuth } from "../context/auth-context";
 
 function Home() {
-  const [status, setStatus] = useState("checking");
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    api
-      .get("/api/health")
-      .then((data) => {
-        setStatus("online");
-        setMessage(data.msg);
-      })
-      .catch(() => {
-        setStatus("offline");
-      });
-  }, []);
+  const { user } = useAuth();
 
   return (
     <div className="container page">
-      <div className="auth-card">
-        <h1 className="auth-title">Splitwise Clone</h1>
-        <p className="auth-subtitle">
-          Share expenses with friends and settle up without the maths.
-        </p>
+      <div className="page-head">
+        <div>
+          <h1 className="section-title">Hi, {user.name}</h1>
+          <p className="section-subtitle">
+            Welcome back. Here is where your groups will live.
+          </p>
+        </div>
+      </div>
 
-        {status === "checking" && (
-          <div className="alert alert-info">Checking backend connection...</div>
-        )}
-        {status === "online" && (
-          <div className="alert alert-info">Backend connected: {message}</div>
-        )}
-        {status === "offline" && (
-          <div className="alert alert-error">
-            Backend is not reachable on http://localhost:5000
-          </div>
-        )}
+      <div className="card">
+        <div className="empty">
+          <div className="empty-title">No groups yet</div>
+          <p>Create a group to start splitting expenses with your friends.</p>
+        </div>
       </div>
     </div>
   );

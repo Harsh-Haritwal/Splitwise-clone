@@ -1,15 +1,21 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import api, { TOKEN_KEY } from "../api";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import api from "../api";
+import { useAuth } from "../context/auth-context";
 
 function Signup() {
   const navigate = useNavigate();
+  const { user, login } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -35,7 +41,7 @@ function Signup() {
         email: email.trim(),
         password: password,
       });
-      localStorage.setItem(TOKEN_KEY, data.token);
+      login(data.token);
       navigate("/");
     } catch (error) {
       setError(error.message);
