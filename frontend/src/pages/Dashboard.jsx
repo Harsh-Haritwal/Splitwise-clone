@@ -374,7 +374,10 @@ function Dashboard() {
           <section className="rail-card">
             <div className="rail-head">
               <h2>Settle up</h2>
-              <span>{overall ? overall.groupCount : 0} circles</span>
+              <span>
+                {overall ? overall.groupCount : 0} circle
+                {overall && overall.groupCount === 1 ? "" : "s"}
+              </span>
             </div>
             <div className="rail-body">
               <p className="rail-copy">
