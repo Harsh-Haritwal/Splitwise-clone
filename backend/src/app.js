@@ -5,6 +5,7 @@ const testRoute = require("./routes/testRoute");
 const authMid = require("./middleware/authMiddleware");
 const groupRouter = require("./routes/groupRoutes");
 const expenseRouter = require("./routes/expenseRoutes");
+const balanceRouter = require("./routes/balanceRoutes");
 const app = express();
 
 app.use(cors());
@@ -14,6 +15,7 @@ app.use(express.json())
 app.use("/user", userRouter);
 app.use("/group", groupRouter);
 app.use("/expense", expenseRouter);
+app.use("/balance", balanceRouter);
 app.use("/user", authMid, testRoute);
 
 app.get("/api/health", (req, res) => {
