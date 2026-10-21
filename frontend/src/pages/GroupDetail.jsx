@@ -27,6 +27,16 @@ const getCreatedDate = (expense) => {
   return new Date(parseInt(expense._id.substring(0, 8), 16) * 1000);
 };
 
+const balanceLabel = (balance) => {
+  if (balance > 0) {
+    return "gets back";
+  }
+  if (balance < 0) {
+    return "owes";
+  }
+  return "settled";
+};
+
 const formatAmount = (value) => {
   return Number(value).toFixed(2);
 };
@@ -43,6 +53,13 @@ function GroupDetail() {
   const [expenses, setExpenses] = useState([]);
   const [expensesLoading, setExpensesLoading] = useState(true);
   const [expensesError, setExpensesError] = useState("");
+
+  const [balances, setBalances] = useState([]);
+  const [balanceSummary, setBalanceSummary] = useState(null);
+  const [debts, setDebts] = useState([]);
+  const [balancesLoading, setBalancesLoading] = useState(true);
+  const [balancesError, setBalancesError] = useState("");
+  const [balanceVersion, setBalanceVersion] = useState(0);
 
   const [addEmail, setAddEmail] = useState("");
   const [adding, setAdding] = useState(false);
@@ -107,6 +124,36 @@ function GroupDetail() {
     };
   }, [groupId]);
 
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      api.get(`/balance/group/${groupId}`),
+      api.get(`/balance/group/${groupId}/summary`),
+      api.get(`/balance/group/${groupId}/settle`),
+    ])
+      .then(([balanceData, summaryData, settleData]) => {
+        if (!cancelled) {
+          setBalances(balanceData.balances);
+          setBalanceSummary(summaryData.summary);
+          setDebts(settleData.settlements);
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setBalancesError(error.message);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setBalancesLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [groupId, balanceVersion]);
+
   const loadGroup = async () => {
     const data = await api.get(`/group/${groupId}`);
     setGroup(data.group);
@@ -116,6 +163,11 @@ function GroupDetail() {
   const loadExpenses = async () => {
     const data = await api.get(`/expense/group/${groupId}`);
     setExpenses(data.expenses);
+  };
+
+  const handleExpenseSaved = async () => {
+    await loadExpenses();
+    setBalanceVersion((version) => version + 1);
   };
 
   const handleAddMember = async (event) => {
@@ -315,6 +367,13 @@ function GroupDetail() {
         </button>
         <button
           type="button"
+          className={tab === "balances" ? "tab active" : "tab"}
+          onClick={() => setTab("balances")}
+        >
+          Balances
+        </button>
+        <button
+          type="button"
           className={tab === "members" ? "tab active" : "tab"}
           onClick={() => setTab("members")}
         >
@@ -334,7 +393,7 @@ function GroupDetail() {
               </div>
             </div>
 
-            <ExpenseForm group={group} onSaved={loadExpenses} />
+            <ExpenseForm group={group} onSaved={handleExpenseSaved} />
           </div>
 
           <div className="card mt-16">
@@ -403,6 +462,179 @@ function GroupDetail() {
               </div>
             )}
           </div>
+        </>
+      )}
+
+      {tab === "balances" && (
+        <>
+          {balancesLoading && (
+            <div className="card">
+              <div className="loading">
+                <div className="spinner"></div>
+                Loading balances...
+              </div>
+            </div>
+          )}
+
+          {!balancesLoading && balancesError && (
+            <div className="alert alert-error">{balancesError}</div>
+          )}
+
+          {!balancesLoading && !balancesError && balanceSummary && (
+            <>
+              <div className="summary-grid mb-16">
+                <div className="summary-card">
+                  <span className="detail-label">Your balance</span>
+                  <span
+                    className={
+                      balanceSummary.myBalance > 0
+                        ? "summary-value amount-pos"
+                        : balanceSummary.myBalance < 0
+                          ? "summary-value amount-neg"
+                          : "summary-value"
+                    }
+                  >
+                    {balanceSummary.myBalance === 0
+                      ? "₹0.00"
+                      : `${balanceSummary.myBalance > 0 ? "+" : "-"}₹${formatAmount(
+                          Math.abs(balanceSummary.myBalance),
+                        )}`}
+                  </span>
+                  <span className="small muted">
+                    {balanceSummary.myStatus === "gets back"
+                      ? "You get back"
+                      : balanceSummary.myStatus === "owes"
+                        ? "You owe"
+                        : "You are settled up"}
+                  </span>
+                </div>
+
+                <div className="summary-card">
+                  <span className="detail-label">Total spent</span>
+                  <span className="summary-value">
+                    ₹{formatAmount(balanceSummary.totalExpenseAmount)}
+                  </span>
+                  <span className="small muted">
+                    {balanceSummary.expenseCount} expense
+                    {balanceSummary.expenseCount === 1 ? "" : "s"} ·{" "}
+                    {balanceSummary.memberCount} member
+                    {balanceSummary.memberCount === 1 ? "" : "s"}
+                  </span>
+                </div>
+
+                <div className="summary-card">
+                  <span className="detail-label">Settled members</span>
+                  <span className="summary-value">
+                    {balanceSummary.settledMembers}
+                  </span>
+                  <span className="small muted">
+                    {balanceSummary.getBackMembers} getting back ·{" "}
+                    {balanceSummary.oweMembers} owing
+                  </span>
+                </div>
+              </div>
+
+              <div className="card mb-16">
+                <div className="card-header">
+                  <div>
+                    <div className="card-title">Member balances</div>
+                    <div className="card-subtitle">
+                      A positive balance means the member gets money back.
+                    </div>
+                  </div>
+                </div>
+
+                <div className="list">
+                  {balances.map((item) => (
+                    <div className="list-row" key={item.user._id}>
+                      <div className="list-main">
+                        <span className="avatar avatar-sm">
+                          {initial(item.user.name)}
+                        </span>
+                        <div>
+                          <div className="list-title">
+                            {item.user.name}
+                            {item.user._id === user.id ? " (you)" : ""}
+                          </div>
+                          <div className="list-meta">
+                            Paid ₹{formatAmount(item.paid)} · Share ₹
+                            {formatAmount(item.share)}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="list-end">
+                        <div
+                          className={
+                            item.balance > 0
+                              ? "amount amount-pos"
+                              : item.balance < 0
+                                ? "amount amount-neg"
+                                : "amount"
+                          }
+                        >
+                          {item.balance === 0
+                            ? "₹0.00"
+                            : `${item.balance > 0 ? "+" : "-"}₹${formatAmount(
+                                Math.abs(item.balance),
+                              )}`}
+                        </div>
+                        <div className="list-meta">
+                          {balanceLabel(item.balance)}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="card">
+                <div className="card-header">
+                  <div>
+                    <div className="card-title">Settle up</div>
+                    <div className="card-subtitle">
+                      The fewest payments that clear every debt in this group.
+                    </div>
+                  </div>
+                </div>
+
+                {debts.length === 0 && (
+                  <div className="empty">
+                    <div className="empty-title">Everyone is settled up</div>
+                    No payments are needed right now.
+                  </div>
+                )}
+
+                {debts.length > 0 && (
+                  <div className="list">
+                    {debts.map((debt, index) => (
+                      <div
+                        className="list-row"
+                        key={`${debt.from._id}-${debt.to._id}-${index}`}
+                      >
+                        <div className="list-main">
+                          <span className="avatar avatar-sm">
+                            {initial(debt.from.name)}
+                          </span>
+                          <div>
+                            <div className="list-title">
+                              {debt.from.name} pays {debt.to.name}
+                            </div>
+                            <div className="list-meta">
+                              {debt.from.name} owes {debt.to.name}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="amount">
+                          ₹{formatAmount(debt.amount)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </>
       )}
 

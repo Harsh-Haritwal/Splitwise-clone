@@ -592,6 +592,35 @@ button {
   margin-bottom: 4px;
 }
 
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.summary-value {
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.group-balance {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 /* Empty + loading */
 .empty {
   text-align: center;
@@ -856,6 +885,10 @@ button {
   }
 
   .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-grid {
     grid-template-columns: 1fr;
   }
 

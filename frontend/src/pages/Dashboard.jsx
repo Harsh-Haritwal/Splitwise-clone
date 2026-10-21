@@ -3,11 +3,26 @@ import { Link } from "react-router-dom";
 import api from "../api";
 import { useAuth } from "../context/auth-context";
 
+const formatAmount = (value) => {
+  return Number(value).toFixed(2);
+};
+
+const balanceColor = (value) => {
+  if (value > 0) {
+    return "amount-pos";
+  }
+  if (value < 0) {
+    return "amount-neg";
+  }
+  return "";
+};
+
 function Dashboard() {
   const { user } = useAuth();
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [overall, setOverall] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
@@ -49,6 +64,22 @@ function Dashboard() {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .get("/balance/me")
+      .then((data) => {
+        if (!cancelled) {
+          setOverall(data);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const handleCreate = async (event) => {
     event.preventDefault();
     setFormError("");
@@ -68,12 +99,22 @@ function Dashboard() {
       setShowForm(false);
       setLoading(true);
       await loadGroups();
+      const balanceData = await api.get("/balance/me");
+      setOverall(balanceData);
     } catch (error) {
       setFormError(error.message);
     } finally {
       setSaving(false);
     }
   };
+
+  const overallValue = overall ? overall.overallBalance : 0;
+  const groupBalanceMap = {};
+  if (overall) {
+    for (const item of overall.groups) {
+      groupBalanceMap[item.group._id] = item.balance;
+    }
+  }
 
   return (
     <div className="container page">
@@ -92,6 +133,38 @@ function Dashboard() {
           {showForm ? "Cancel" : "New group"}
         </button>
       </div>
+
+      {overall && groups.length > 0 && (
+        <div className="summary-grid mb-16">
+          <div className="summary-card">
+            <span className="detail-label">Overall balance</span>
+            <span className={`summary-value ${balanceColor(overallValue)}`}>
+              {overallValue === 0
+                ? "₹0.00"
+                : `${overallValue > 0 ? "+" : "-"}₹${formatAmount(
+                    Math.abs(overallValue),
+                  )}`}
+            </span>
+            <span className="small muted">
+              {overallValue > 0
+                ? "You get back"
+                : overallValue < 0
+                  ? "You owe"
+                  : "You are settled up"}{" "}
+              across {overall.groupCount} group
+              {overall.groupCount === 1 ? "" : "s"}
+            </span>
+          </div>
+
+          <div className="summary-card">
+            <span className="detail-label">Groups</span>
+            <span className="summary-value">{groups.length}</span>
+            <span className="small muted">
+              Tap a group to see its balances
+            </span>
+          </div>
+        </div>
+      )}
 
       {showForm && (
         <div className="card mb-16">
@@ -158,25 +231,39 @@ function Dashboard() {
 
       {!loading && !error && groups.length > 0 && (
         <div className="groups-grid">
-          {groups.map((group) => (
-            <Link
-              to={`/groups/${group._id}`}
-              className="group-card"
-              key={group._id}
-            >
-              <span className="group-avatar">
-                {group.name.charAt(0).toUpperCase()}
-              </span>
-              <span className="group-info">
-                <span className="group-name">{group.name}</span>
-                <span className="group-meta">
-                  {group.members.length} member
-                  {group.members.length === 1 ? "" : "s"} · Created{" "}
-                  {new Date(group.createdAt).toLocaleDateString()}
+          {groups.map((group) => {
+            const balance = groupBalanceMap[group._id] || 0;
+            return (
+              <Link
+                to={`/groups/${group._id}`}
+                className="group-card"
+                key={group._id}
+              >
+                <span className="group-avatar">
+                  {group.name.charAt(0).toUpperCase()}
                 </span>
-              </span>
-            </Link>
-          ))}
+                <span className="group-info">
+                  <span className="group-name">{group.name}</span>
+                  <span className="group-meta">
+                    {group.members.length} member
+                    {group.members.length === 1 ? "" : "s"} · Created{" "}
+                    {new Date(group.createdAt).toLocaleDateString()}
+                  </span>
+                  {overall && (
+                    <span
+                      className={`group-balance ${balanceColor(balance)}`}
+                    >
+                      {balance === 0
+                        ? "Settled up"
+                        : `${
+                            balance > 0 ? "You get back" : "You owe"
+                          } ₹${formatAmount(Math.abs(balance))}`}
+                    </span>
+                  )}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
