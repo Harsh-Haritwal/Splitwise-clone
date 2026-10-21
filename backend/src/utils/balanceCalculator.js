@@ -1,15 +1,23 @@
 const Expense = require("../models/expenseModel");
+const Settlement = require("../models/settlementModel");
 const { roundAmount } = require("./expenseSplits");
 
 const calculateGroupBalances = async (groupId) => {
   const expenses = await Expense.find({ groupId: groupId });
+  const settlements = await Settlement.find({ groupId: groupId });
 
   const totals = {};
   let totalExpenseAmount = 0;
 
   const getTotal = (userId) => {
     if (!totals[userId]) {
-      totals[userId] = { user: userId, paid: 0, share: 0 };
+      totals[userId] = {
+        user: userId,
+        paid: 0,
+        share: 0,
+        settlementPaid: 0,
+        settlementReceived: 0,
+      };
     }
     return totals[userId];
   };
@@ -26,13 +34,28 @@ const calculateGroupBalances = async (groupId) => {
     }
   }
 
+  for (const settlement of settlements) {
+    const payerId = settlement.paidBy.toString();
+    const receiverId = settlement.paidTo.toString();
+
+    getTotal(payerId).settlementPaid += settlement.amount;
+    getTotal(receiverId).settlementReceived += settlement.amount;
+  }
+
   const balances = Object.keys(totals).map((userId) => {
     const total = totals[userId];
     return {
       user: total.user,
       paid: roundAmount(total.paid),
       share: roundAmount(total.share),
-      balance: roundAmount(total.paid - total.share),
+      settlementPaid: roundAmount(total.settlementPaid),
+      settlementReceived: roundAmount(total.settlementReceived),
+      balance: roundAmount(
+        total.paid -
+          total.share +
+          total.settlementPaid -
+          total.settlementReceived,
+      ),
     };
   });
 
@@ -40,6 +63,7 @@ const calculateGroupBalances = async (groupId) => {
     balances: balances,
     totalExpenseAmount: roundAmount(totalExpenseAmount),
     expenseCount: expenses.length,
+    settlementCount: settlements.length,
   };
 };
 

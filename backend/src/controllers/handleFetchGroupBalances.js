@@ -33,12 +33,21 @@ const handleFetchGroupBalances = async (req, res) => {
     const balances = group.members.map((member) => {
       const found = balanceMap[member._id.toString()];
       if (!found) {
-        return { user: member, paid: 0, share: 0, balance: 0 };
+        return {
+          user: member,
+          paid: 0,
+          share: 0,
+          settlementPaid: 0,
+          settlementReceived: 0,
+          balance: 0,
+        };
       }
       return {
         user: member,
         paid: found.paid,
         share: found.share,
+        settlementPaid: found.settlementPaid,
+        settlementReceived: found.settlementReceived,
         balance: found.balance,
       };
     });
@@ -50,6 +59,7 @@ const handleFetchGroupBalances = async (req, res) => {
       balances: balances,
       totalExpenseAmount: result.totalExpenseAmount,
       expenseCount: result.expenseCount,
+      settlementCount: result.settlementCount,
     });
   } catch (error) {
     console.log(error);
