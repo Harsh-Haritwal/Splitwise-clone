@@ -2,7 +2,8 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AuthProvider from "./context/AuthProvider";
-import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
+import GroupDetail from "./pages/GroupDetail";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
@@ -19,7 +20,15 @@ function App() {
               path="/"
               element={
                 <ProtectedRoute>
-                  <Home />
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/groups/:groupId"
+              element={
+                <ProtectedRoute>
+                  <GroupDetail />
                 </ProtectedRoute>
               }
             />

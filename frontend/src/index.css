@@ -587,6 +587,82 @@ button {
   border-bottom-color: var(--brand);
 }
 
+/* Groups */
+.back-link {
+  display: inline-block;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.back-link:hover {
+  color: var(--brand-dark);
+  text-decoration: none;
+}
+
+.groups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.group-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  color: inherit;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.group-card:hover {
+  border-color: var(--brand);
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+.group-avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  border-radius: 14px;
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.group-avatar-lg {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  font-size: 22px;
+}
+
+.group-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.group-name {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.group-meta {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
 /* Profile */
 .profile-grid {
   display: grid;

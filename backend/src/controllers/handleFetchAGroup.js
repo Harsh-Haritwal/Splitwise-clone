@@ -16,6 +16,8 @@ const handleFetchAGroup = async(req, res) => {
 
     try {
         const group = await Group.findOne({_id: groupId, members :id})
+            .populate("members", "name email avatar")
+            .populate("createdBy", "name email avatar");
         if(!group){
             return res.status(404).json({msg: "No group found"});
         }
