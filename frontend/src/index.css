@@ -334,6 +334,34 @@ button {
   accent-color: var(--brand);
 }
 
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.share-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.share-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.share-input {
+  width: 120px;
+  text-align: right;
+}
+
 /* Auth */
 .auth-wrap {
   min-height: calc(100vh - 64px);
@@ -775,6 +803,14 @@ button {
 
   .inline-form {
     flex-direction: column;
+  }
+
+  .checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .share-row {
+    flex-wrap: wrap;
   }
 
   .profile-grid {

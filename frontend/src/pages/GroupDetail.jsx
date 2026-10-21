@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../api";
+import ExpenseForm from "../components/ExpenseForm";
 import { useAuth } from "../context/auth-context";
 
 const initial = (name) => {
@@ -26,6 +27,7 @@ function GroupDetail() {
   const [savingName, setSavingName] = useState(false);
   const [settingsError, setSettingsError] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [tab, setTab] = useState("expenses");
 
   useEffect(() => {
     let cancelled = false;
@@ -243,13 +245,48 @@ function GroupDetail() {
         </div>
       )}
 
-      <div className="card">
-        <div className="card-header">
-          <div>
-            <div className="card-title">Members</div>
-            <div className="card-subtitle">Everyone who shares this group.</div>
+      <div className="tabs">
+        <button
+          type="button"
+          className={tab === "expenses" ? "tab active" : "tab"}
+          onClick={() => setTab("expenses")}
+        >
+          Expenses
+        </button>
+        <button
+          type="button"
+          className={tab === "members" ? "tab active" : "tab"}
+          onClick={() => setTab("members")}
+        >
+          Members
+        </button>
+      </div>
+
+      {tab === "expenses" && (
+        <div className="card">
+          <div className="card-header">
+            <div>
+              <div className="card-title">Add an expense</div>
+              <div className="card-subtitle">
+                Split it equally, by exact amounts or by percentage.
+              </div>
+            </div>
           </div>
+
+          <ExpenseForm group={group} />
         </div>
+      )}
+
+      {tab === "members" && (
+        <div className="card">
+          <div className="card-header">
+            <div>
+              <div className="card-title">Members</div>
+              <div className="card-subtitle">
+                Everyone who shares this group.
+              </div>
+            </div>
+          </div>
 
         {memberMessage && (
           <div className="alert alert-info mb-16">{memberMessage}</div>
@@ -312,7 +349,8 @@ function GroupDetail() {
             </span>
           </div>
         </form>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
